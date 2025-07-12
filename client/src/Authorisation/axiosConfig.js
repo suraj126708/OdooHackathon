@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080",
+  baseURL: "https://odoohackathon-h2x5.onrender.com",
   timeout: 10000, // 10 second timeout
   headers: {
     "Content-Type": "application/json",

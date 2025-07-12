@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const response = await axios.get(
-            "http://localhost:8080/api/auth/verify",
+            "https://odoohackathon-h2x5.onrender.com/api/auth/verify",
             {
               headers: { Authorization: `Bearer ${token}` },
             }

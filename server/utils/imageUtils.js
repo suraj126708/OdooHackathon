@@ -21,12 +21,12 @@ const convertToImageUrl = (filePath, req) => {
 /**
  * Convert a file path to a full URL without request object
  * @param {string} filePath - The file path (e.g., "uploads/filename.jpg")
- * @param {string} baseUrl - Base URL (e.g., "http://localhost:8080")
+ * @param {string} baseUrl - Base URL (e.g., "https://odoohackathon-h2x5.onrender.com")
  * @returns {string} Full URL to the image
  */
 const convertToImageUrlStatic = (
   filePath,
-  baseUrl = "http://localhost:8080"
+  baseUrl = "https://odoohackathon-h2x5.onrender.com"
 ) => {
   if (!filePath) return null;
 
