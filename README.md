@@ -86,10 +86,15 @@ npm run client
 
 ### Application Demo Video
 
-<video width="100%" controls>
-  <source src="./ProjectImges/recording.mp4" type="video/mp4">
-  Your browser does not support the video tag.
-</video>
+> **Note**: The demo video is available in the `ProjectImges/recording.mp4` file. Due to GitHub's limitations with video playback in README files, please download and view the video locally.
+
+📹 **[Download Demo Video](./ProjectImges/recording.mp4)** (27MB)
+
+_Alternatively, you can run the application locally to see it in action:_
+
+```bash
+npm run dev
+```
 
 ### Homepage
 
