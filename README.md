@@ -82,7 +82,14 @@ npm run client
 - **API Documentation**: http://localhost:8080/api
 - **Health Check**: http://localhost:8080/ping
 
-## Screenshots
+## Screenshots & Demo
+
+### Application Demo Video
+
+<video width="100%" controls>
+  <source src="./ProjectImges/Screen%20Recording%202025-07-12%20180235.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 ### Homepage
 
