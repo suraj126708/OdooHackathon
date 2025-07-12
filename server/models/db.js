@@ -1,8 +1,20 @@
 const mongoose = require("mongoose");
-require("dotenv").config();
-const Mongo_url = process.env.Mongo_url;
 
-mongoose
-  .connect(Mongo_url)
-  .then(() => console.log("MongoDB Connected..."))
-  .catch((err) => console.log("mongodb connection err" + err));
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(
+      process.env.MONGODB_URI || "mongodb://localhost:27017/odoo-hackathon",
+      {
+        useNewUrlParser: true,
+        useUnifiedTopology: true,
+      }
+    );
+
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+    process.exit(1);
+  }
+};
+
+module.exports = connectDB;

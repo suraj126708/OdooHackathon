@@ -1,8 +1,15 @@
 /* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useContext } from "react";
 import axios from "axios";
-const AuthContext = createContext();
+
+export const AuthContext = createContext({
+  isAuthenticated: null,
+  user: null,
+  login: () => {},
+  logout: () => {},
+  isAdmin: false,
+});
 
 export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(null);
@@ -21,16 +28,8 @@ export const AuthProvider = ({ children }) => {
     setToken(token);
     setUser(user);
     setIsAuthenticated(true);
-  };
-
-  const Admicheck = () => {
-    useEffect(() => {
-      const name = localStorage.getItem("loggedInUser");
-
-      if (name === "Suraj Gitte") {
-        setIsAdmin(true);
-      }
-    }, []);
+    // Set admin status based on user role
+    setIsAdmin(user.role === "admin");
   };
 
   const logout = () => {
@@ -48,7 +47,7 @@ export const AuthProvider = ({ children }) => {
       if (token) {
         try {
           const response = await axios.get(
-            "https://coal-mines-backend.onrender.com/auth/verify",
+            "http://localhost:8080/api/auth/verify",
             {
               headers: { Authorization: `Bearer ${token}` },
             }
@@ -56,6 +55,8 @@ export const AuthProvider = ({ children }) => {
           if (response.data.user) {
             setUser(response.data.user);
             setIsAuthenticated(true);
+            // Check if user is admin based on role
+            setIsAdmin(response.data.user.role === "admin");
           } else {
             logout();
           }
@@ -70,7 +71,14 @@ export const AuthProvider = ({ children }) => {
     verifyToken();
   }, []);
 
-  Admicheck();
+  useEffect(() => {
+    // Update admin status when user data changes
+    if (user) {
+      setIsAdmin(user.role === "admin");
+    } else {
+      setIsAdmin(false);
+    }
+  }, [user]);
 
   return (
     <AuthContext.Provider
@@ -81,4 +89,11 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export default AuthContext;
+// Custom hook to use auth context
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};

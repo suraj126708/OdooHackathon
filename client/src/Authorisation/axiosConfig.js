@@ -1,27 +1,62 @@
 import axios from "axios";
-import { useHistory } from "react-router-dom"; // Assuming you're using react-router
 
 const axiosInstance = axios.create({
   baseURL: "http://localhost:8080",
+  timeout: 10000, // 10 second timeout
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem("token");
-  console.log("Request Config:", config);
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Request interceptor
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    console.log("Request Config:", config);
+
+    // Add token to headers if it exists
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+
+    // For multipart/form-data requests, don't set Content-Type
+    if (config.data instanceof FormData) {
+      delete config.headers["Content-Type"];
+    }
+
+    return config;
+  },
+  (error) => {
+    console.error("Request Error:", error);
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
+// Response interceptor
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log("Response:", response);
+    return response;
+  },
   (error) => {
     console.error("Response Error:", error);
-    if (error.response && error.response.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
+
+    // Handle network errors
+    if (!error.response) {
+      console.error("Network Error - No response received");
+      return Promise.reject({
+        message: "Network error. Please check your connection and try again.",
+        isNetworkError: true,
+      });
     }
+
+    // Handle 401 unauthorized
+    if (error.response.status === 401) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      // Don't redirect automatically, let the component handle it
+    }
+
     return Promise.reject(error);
   }
 );

@@ -13,13 +13,18 @@ const ensureAuthenticated = (req, res, next) => {
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET || "your-secret-key"
+    );
     req.user = decoded;
     next();
   } catch (err) {
-    return res
-      .status(403)
-      .json({ message: "Unauthorized, JWT token is invalid or expired" });
+    console.error("JWT Verification Error:", err.message);
+    return res.status(401).json({
+      message: "Unauthorized, JWT token is invalid or expired",
+      success: false,
+    });
   }
 };
 
