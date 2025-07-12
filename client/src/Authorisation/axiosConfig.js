@@ -6,6 +6,7 @@ const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Enable credentials for CORS
 });
 
 // Request interceptor
@@ -13,6 +14,9 @@ axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
     console.log("Request Config:", config);
+    console.log("Request URL:", config.url);
+    console.log("Request Method:", config.method);
+    console.log("Request Headers:", config.headers);
 
     // Add token to headers if it exists
     if (token) {
@@ -40,6 +44,9 @@ axiosInstance.interceptors.response.use(
   },
   (error) => {
     console.error("Response Error:", error);
+    console.error("Response Error Config:", error.config);
+    console.error("Response Error Status:", error.response?.status);
+    console.error("Response Error Data:", error.response?.data);
 
     // Handle network errors
     if (!error.response) {
@@ -47,6 +54,16 @@ axiosInstance.interceptors.response.use(
       return Promise.reject({
         message: "Network error. Please check your connection and try again.",
         isNetworkError: true,
+      });
+    }
+
+    // Handle CORS errors specifically
+    if (error.response.status === 0 || error.code === "ERR_NETWORK") {
+      console.error("CORS Error detected");
+      return Promise.reject({
+        message:
+          "CORS error. Please check if the server is running and accessible.",
+        isCorsError: true,
       });
     }
 

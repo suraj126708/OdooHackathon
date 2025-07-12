@@ -22,17 +22,45 @@ app.use(bodyParser.json({ limit: "10mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "10mb" }));
 
 // CORS configuration
+const allowedOrigins = [
+  "https://odoo-hackathon-fawn.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000",
+  "http://localhost:8080",
+];
+
+// Add environment-specific origins
+if (process.env.NODE_ENV === "development") {
+  allowedOrigins.push("http://localhost:4173"); // Vite preview
+}
+
+// Add production origins if needed
+if (process.env.NODE_ENV === "production") {
+  // Add any additional production origins here
+  console.log("Running in production mode");
+}
+
+console.log("Allowed CORS origins:", allowedOrigins);
+console.log("Current NODE_ENV:", process.env.NODE_ENV);
+
+// Simple CORS configuration
 app.use(
   cors({
-    origin: [
-      "https://odoo-hackathon-fawn.vercel.app/",
-      "http://localhost:5173",
-    ],
+    origin: allowedOrigins,
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "X-Requested-With",
+      "Accept",
+      "Origin",
+    ],
   })
 );
+
+// Handle preflight requests
+app.options("*", cors());
 
 // Static files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -49,6 +77,17 @@ app.get("/ping", (req, res) => {
     message: "Server is running",
     timestamp: new Date().toISOString(),
     status: "healthy",
+    cors: "enabled",
+    origins: allowedOrigins,
+  });
+});
+
+// Test CORS endpoint
+app.get("/test-cors", (req, res) => {
+  res.json({
+    message: "CORS test successful",
+    origin: req.headers.origin,
+    timestamp: new Date().toISOString(),
   });
 });
 
