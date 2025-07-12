@@ -82,6 +82,38 @@ npm run client
 - **API Documentation**: http://localhost:8080/api
 - **Health Check**: http://localhost:8080/ping
 
+## Screenshots
+
+### Homepage
+
+![Homepage](<./ProjectImges/Screenshot%20(34).png>)
+
+### User Authentication
+
+![Login Page](<./ProjectImges/Screenshot%20(35).png>)
+![Registration Page](<./ProjectImges/Screenshot%20(36).png>)
+
+### Question Management
+
+![Ask Question](<./ProjectImges/Screenshot%20(37).png>)
+![Question Detail](<./ProjectImges/Screenshot%20(38).png>)
+![Question List](<./ProjectImges/Screenshot%20(39).png>)
+
+### User Profile & Settings
+
+![User Profile](<./ProjectImges/Screenshot%20(40).png>)
+![Profile Settings](<./ProjectImges/Screenshot%20(41).png>)
+
+### Admin Dashboard
+
+![Admin Dashboard](<./ProjectImges/Screenshot%20(42).png>)
+![User Management](<./ProjectImges/Screenshot%20(43).png>)
+
+### Notifications & UI
+
+![Notifications](<./ProjectImges/Screenshot%20(44).png>)
+![Responsive Design](<./ProjectImges/Screenshot%20(45).png>)
+
 ## Project Structure
 
 ```
