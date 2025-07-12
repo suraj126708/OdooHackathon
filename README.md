@@ -87,7 +87,7 @@ npm run client
 ### Application Demo Video
 
 <video width="100%" controls>
-  <source src="./ProjectImges/Screen%20Recording%202025-07-12%20180235.mp4" type="video/mp4">
+  <source src="./ProjectImges/recording.mp4" type="video/mp4">
   Your browser does not support the video tag.
 </video>
 
