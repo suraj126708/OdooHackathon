@@ -3,6 +3,7 @@ import { Bell, Home, User, X, Plus, Upload } from "lucide-react";
 import { createQuestion, getPopularTags } from "../services/questionService";
 import { useNavigate } from "react-router-dom";
 import RichTextEditor from "../components/RichTextEditor";
+import axios from "../Authorisation/axiosConfig";
 
 const AskQuestionPage = () => {
   const navigate = useNavigate();
@@ -15,8 +16,7 @@ const AskQuestionPage = () => {
   const [uploadedImages, setUploadedImages] = useState([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
-  const fileInputRef = useRef(null);
+  const [availableUsers, setAvailableUsers] = useState([]);
 
   // Available tags for suggestions - will be populated from API
   const [availableTags, setAvailableTags] = useState([
@@ -64,26 +64,33 @@ const AskQuestionPage = () => {
     "Webpack",
   ]);
 
-  // Load popular tags on component mount
+  // Load popular tags and users on component mount
   useEffect(() => {
-    const loadPopularTags = async () => {
+    const loadData = async () => {
       try {
-        const response = await getPopularTags();
-        if (response.success && response.data) {
-          const tagNames = response.data.map((tag) => tag.name);
+        // Load popular tags
+        const tagsResponse = await getPopularTags();
+        if (tagsResponse.success && tagsResponse.data) {
+          const tagNames = tagsResponse.data.map((tag) => tag.name);
           setAvailableTags((prevTags) => {
             // Combine API tags with default tags, removing duplicates
             const combined = [...new Set([...prevTags, ...tagNames])];
             return combined;
           });
         }
+
+        // Load available users for mentions
+        const usersResponse = await axios.get("/api/questions/users");
+        if (usersResponse.data.success) {
+          setAvailableUsers(usersResponse.data.data || []);
+        }
       } catch (error) {
-        console.error("Error loading popular tags:", error);
+        console.error("Error loading data:", error);
         // Keep default tags if API fails
       }
     };
 
-    loadPopularTags();
+    loadData();
   }, []);
 
   const handleTagInput = (e) => {
@@ -107,25 +114,18 @@ const AskQuestionPage = () => {
     setSelectedTags(selectedTags.filter((tag) => tag !== tagToRemove));
   };
 
-  const handleImageUpload = (e) => {
-    const files = Array.from(e.target.files);
-    files.forEach((file) => {
-      if (file.type.startsWith("image/")) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const imageUrl = event.target.result;
-          setUploadedImages((prev) => [
-            ...prev,
-            { file, url: imageUrl, name: file.name },
-          ]);
+  // Handle image upload from RichTextEditor
+  const handleImageUpload = (file, imageUrl) => {
+    setUploadedImages((prev) => [
+      ...prev,
+      { file, url: imageUrl, name: file.name },
+    ]);
+  };
 
-          // Insert image markdown into description
-          const imageMarkdown = `![${file.name}](${imageUrl})\n`;
-          setDescription((prev) => prev + imageMarkdown);
-        };
-        reader.readAsDataURL(file);
-      }
-    });
+  // Handle user mention from RichTextEditor
+  const handleMention = (user) => {
+    console.log(`Mentioned user: ${user.username}`);
+    // You can add additional logic here like notifications, etc.
   };
 
   const handleSubmit = async (e) => {
@@ -243,33 +243,41 @@ const AskQuestionPage = () => {
               <RichTextEditor
                 value={description}
                 onChange={setDescription}
-                placeholder="Provide detailed information about your question. Include what you've tried and what specific help you need."
+                placeholder="Provide detailed information about your question. Include what you've tried and what specific help you need. You can use formatting tools above the text area. Type @ to mention users."
                 rows={12}
+                onImageUpload={handleImageUpload}
+                onMention={handleMention}
+                availableUsers={availableUsers}
               />
 
               {/* Uploaded Images Preview */}
               {uploadedImages.length > 0 && (
-                <div className="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2">
-                  {uploadedImages.map((img, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={img.url}
-                        alt={img.name}
-                        className="w-full h-20 object-cover rounded"
-                      />
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setUploadedImages((prev) =>
-                            prev.filter((_, i) => i !== index)
-                          )
-                        }
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">
+                    Uploaded Images ({uploadedImages.length})
+                  </h4>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {uploadedImages.map((img, index) => (
+                      <div key={index} className="relative">
+                        <img
+                          src={img.url}
+                          alt={img.name}
+                          className="w-full h-20 object-cover rounded border"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setUploadedImages((prev) =>
+                              prev.filter((_, i) => i !== index)
+                            )
+                          }
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600 transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -301,7 +309,7 @@ const AskQuestionPage = () => {
                         key={tag}
                         type="button"
                         onClick={() => addTag(tag)}
-                        className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm"
+                        className="w-full text-left px-3 py-2 hover:bg-gray-100 text-sm transition-colors"
                       >
                         {tag}
                       </button>
@@ -322,7 +330,7 @@ const AskQuestionPage = () => {
                       <button
                         type="button"
                         onClick={() => removeTag(tag)}
-                        className="text-blue-600 hover:text-blue-800"
+                        className="text-blue-600 hover:text-blue-800 transition-colors"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -341,7 +349,7 @@ const AskQuestionPage = () => {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
               >
                 {isSubmitting ? (
                   <>
@@ -356,58 +364,6 @@ const AskQuestionPage = () => {
           </form>
         </div>
       </div>
-
-      {/* Link Dialog */}
-      {/* This section is no longer needed as RichTextEditor handles formatting */}
-      {/* {showLinkDialog && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 className="text-lg font-semibold mb-4">Insert Link</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Link Text
-                </label>
-                <input
-                  type="text"
-                  value={linkText}
-                  onChange={(e) => setLinkText(e.target.value)}
-                  placeholder="Enter link text"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  URL
-                </label>
-                <input
-                  type="url"
-                  value={linkUrl}
-                  onChange={(e) => setLinkUrl(e.target.value)}
-                  placeholder="https://example.com"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 mt-6">
-              <button
-                type="button"
-                onClick={() => setShowLinkDialog(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={insertLink}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-              >
-                Insert
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
     </div>
   );
 };

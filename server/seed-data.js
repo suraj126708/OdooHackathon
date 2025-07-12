@@ -1,40 +1,26 @@
 const mongoose = require("mongoose");
 const { User, Question, Tag, Answer } = require("./models");
+require("dotenv").config();
 
 async function seedData() {
   try {
     // Connect to MongoDB
-    await mongoose.connect(
-      process.env.MONGODB_URI || "mongodb://localhost:27017/odoo-hackathon",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      }
-    );
+    const mongoUri =
+      process.env.MONGODB_URI || "mongodb://localhost:27017/odoo-hackathon";
+    console.log("🔗 Connecting to MongoDB:", mongoUri);
 
-    console.log("🔗 Connected to MongoDB");
+    await mongoose.connect(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
+    console.log("✅ Connected to MongoDB");
 
     // Clear existing data
     await Question.deleteMany({});
     await Tag.deleteMany({});
     await Answer.deleteMany({});
     console.log("🗑️  Cleared existing data");
-
-    // Create sample tags
-    const tags = await Tag.insertMany([
-      { name: "javascript", color: "#f7df1e", questionCount: 0 },
-      { name: "react", color: "#61dafb", questionCount: 0 },
-      { name: "nodejs", color: "#339933", questionCount: 0 },
-      { name: "mongodb", color: "#47a248", questionCount: 0 },
-      { name: "sql", color: "#336791", questionCount: 0 },
-      { name: "python", color: "#3776ab", questionCount: 0 },
-      { name: "html", color: "#e34f26", questionCount: 0 },
-      { name: "css", color: "#1572b6", questionCount: 0 },
-      { name: "git", color: "#f05032", questionCount: 0 },
-      { name: "docker", color: "#2496ed", questionCount: 0 },
-    ]);
-
-    console.log("🏷️  Created sample tags");
 
     // Get a user (create one if none exists)
     let user = await User.findOne();
@@ -50,6 +36,52 @@ async function seedData() {
       await user.save();
       console.log("👤 Created demo user");
     }
+
+    // Create sample tags with createdBy field
+    const tags = await Tag.insertMany([
+      {
+        name: "javascript",
+        color: "#f7df1e",
+        questionCount: 0,
+        createdBy: user._id,
+      },
+      {
+        name: "react",
+        color: "#61dafb",
+        questionCount: 0,
+        createdBy: user._id,
+      },
+      {
+        name: "nodejs",
+        color: "#339933",
+        questionCount: 0,
+        createdBy: user._id,
+      },
+      {
+        name: "mongodb",
+        color: "#47a248",
+        questionCount: 0,
+        createdBy: user._id,
+      },
+      { name: "sql", color: "#336791", questionCount: 0, createdBy: user._id },
+      {
+        name: "python",
+        color: "#3776ab",
+        questionCount: 0,
+        createdBy: user._id,
+      },
+      { name: "html", color: "#e34f26", questionCount: 0, createdBy: user._id },
+      { name: "css", color: "#1572b6", questionCount: 0, createdBy: user._id },
+      { name: "git", color: "#f05032", questionCount: 0, createdBy: user._id },
+      {
+        name: "docker",
+        color: "#2496ed",
+        questionCount: 0,
+        createdBy: user._id,
+      },
+    ]);
+
+    console.log("🏷️  Created sample tags");
 
     // Create sample questions
     const sampleQuestions = [
@@ -188,9 +220,14 @@ async function seedData() {
     console.log("\n🚀 You can now test the homepage with real data!");
   } catch (error) {
     console.error("❌ Error seeding data:", error);
+    if (error.name === "ValidationError") {
+      console.error("Validation errors:", error.errors);
+    }
   } finally {
-    await mongoose.disconnect();
-    console.log("🔌 Disconnected from MongoDB");
+    if (mongoose.connection.readyState === 1) {
+      await mongoose.disconnect();
+      console.log("🔌 Disconnected from MongoDB");
+    }
   }
 }
 

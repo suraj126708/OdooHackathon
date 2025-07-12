@@ -8,6 +8,8 @@ import {
 } from "../services/questionService";
 import { Home, User, ArrowLeft, Check, ArrowUp, ArrowDown } from "lucide-react";
 import RichTextEditor from "../components/RichTextEditor";
+import MarkdownRenderer from "../components/MarkdownRenderer";
+import axios from "../Authorisation/axiosConfig";
 
 import { AuthContext } from "../Authorisation/AuthProvider";
 
@@ -24,6 +26,7 @@ const QuestionDetail = () => {
   const [showAnswerForm, setShowAnswerForm] = useState(false);
   const [userVotes, setUserVotes] = useState({});
   const [isAcceptingAnswer, setIsAcceptingAnswer] = useState(false);
+  const [availableUsers, setAvailableUsers] = useState([]);
 
   useEffect(() => {
     const fetchQuestion = async () => {
@@ -44,8 +47,20 @@ const QuestionDetail = () => {
       }
     };
 
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get("/api/questions/users");
+        if (response.data.success) {
+          setAvailableUsers(response.data.data || []);
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+      }
+    };
+
     if (id) {
       fetchQuestion();
+      fetchUsers();
     }
   }, [id]);
 
@@ -212,6 +227,12 @@ const QuestionDetail = () => {
     }
   };
 
+  // Handle user mention from RichTextEditor
+  const handleMention = (user) => {
+    console.log(`Mentioned user: ${user.username}`);
+    // You can add additional logic here like notifications, etc.
+  };
+
   const VoteButtons = ({ targetType, targetId, votes, isVertical = true }) => {
     const upvoteKey = `${targetType}-${targetId}-upvote`;
     const downvoteKey = `${targetType}-${targetId}-downvote`;
@@ -281,12 +302,7 @@ const QuestionDetail = () => {
               </h1>
 
               <div className="prose max-w-none mb-4">
-                <div
-                  className="text-gray-700 leading-relaxed"
-                  dangerouslySetInnerHTML={{
-                    __html: question.description.replace(/\n/g, "<br>"),
-                  }}
-                />
+                <MarkdownRenderer content={question.description} />
               </div>
 
               {/* Tags */}
@@ -344,7 +360,7 @@ const QuestionDetail = () => {
 
           {/* Answer Form */}
           {showAnswerForm && isAuthenticated && (
-            <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
+            <div className="mb-6 p-4 border border-gray-200 rounded-lg">
               <h3 className="text-lg font-semibold text-gray-800 mb-3">
                 Your Answer
               </h3>
@@ -352,8 +368,10 @@ const QuestionDetail = () => {
                 <RichTextEditor
                   value={answerContent}
                   onChange={setAnswerContent}
-                  placeholder="Write your answer here. Be clear and provide helpful information..."
+                  placeholder="Write your answer here. Be clear and provide helpful information... Type @ to mention users."
                   rows={8}
+                  onMention={handleMention}
+                  availableUsers={availableUsers}
                 />
                 <div className="flex justify-end gap-2 mt-4">
                   <button
@@ -433,12 +451,9 @@ const QuestionDetail = () => {
                         </div>
                       )}
 
-                      <div
-                        className="text-gray-700 leading-relaxed mb-4"
-                        dangerouslySetInnerHTML={{
-                          __html: answer.content.replace(/\n/g, "<br>"),
-                        }}
-                      />
+                      <div className="mb-4">
+                        <MarkdownRenderer content={answer.content} />
+                      </div>
 
                       <div className="flex items-center justify-between text-sm text-gray-500">
                         <div className="flex items-center space-x-4">

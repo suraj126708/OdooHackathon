@@ -282,7 +282,7 @@ const Login = () => {
             </p>
             <div className="text-xs text-gray-500 space-y-1">
               <p>
-                <strong>Email:</strong> demo@example.com or admin@gmail.com
+                <strong>Email:</strong> demo@gmail.com or admin@gmail.com
               </p>
               <p>
                 <strong>Password:</strong> demo123 or admin123

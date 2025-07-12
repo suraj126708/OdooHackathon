@@ -954,6 +954,30 @@ const deleteAnswer = async (req, res) => {
   }
 };
 
+// Get users for mentions
+const getUsersForMentions = async (req, res) => {
+  try {
+    const users = await User.find({
+      isActive: true,
+      isBanned: false,
+    })
+      .select("_id name username profilePicture")
+      .sort({ username: 1 })
+      .limit(100); // Limit to prevent performance issues
+
+    res.status(200).json({
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    console.error("Get Users for Mentions Error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching users for mentions",
+    });
+  }
+};
+
 module.exports = {
   getQuestions,
   getQuestion,
@@ -968,4 +992,5 @@ module.exports = {
   deleteQuestion,
   editAnswer,
   deleteAnswer,
+  getUsersForMentions,
 };

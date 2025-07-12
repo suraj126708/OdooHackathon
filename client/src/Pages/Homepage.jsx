@@ -23,6 +23,7 @@ import {
 import axios from "../Authorisation/axiosConfig";
 import { handleSuccess, handleError } from "../utils";
 import { AuthContext } from "../Authorisation/AuthProvider";
+import MarkdownRenderer from "../components/MarkdownRenderer";
 
 const Homepage = () => {
   const navigate = useNavigate();
@@ -376,9 +377,9 @@ const Homepage = () => {
                           </div>
                         </div>
 
-                        <p className="text-gray-600 mb-4 line-clamp-3">
-                          {question.description}
-                        </p>
+                        <div className="text-gray-600 mb-4 line-clamp-3">
+                          <MarkdownRenderer content={question.description} />
+                        </div>
 
                         {/* Tags */}
                         <div className="flex flex-wrap gap-2 mb-4">

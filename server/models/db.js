@@ -2,17 +2,22 @@ const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(
-      process.env.MONGODB_URI || "mongodb://localhost:27017/odoo-hackathon",
-      {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      }
-    );
+    const mongoUri =
+      process.env.MONGODB_URI || "mongodb://localhost:27017/odoo-hackathon";
+    console.log("🔗 Connecting to MongoDB:", mongoUri);
 
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
+    console.log("🔗 MONGODB_URI:", process.env.MONGODB_URI || "not found");
+
+    const conn = await mongoose.connect(mongoUri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+
+    console.log(`✅ MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
-    console.error(`Error: ${error.message}`);
+    console.error(`❌ MongoDB Connection Error: ${error.message}`);
+    console.error("💡 Make sure MongoDB is running on your system");
+    console.error("💡 Or set MONGODB_URI environment variable");
     process.exit(1);
   }
 };

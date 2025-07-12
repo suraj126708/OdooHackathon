@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useAuth } from "../Authorisation/AuthProvider";
 import {
   getUserQuestions,
@@ -6,7 +6,7 @@ import {
   deleteQuestion,
   deleteAnswer,
 } from "../services/questionService";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../Authorisation/axiosConfig";
 import EditQuestion from "../components/EditQuestion";
 import EditAnswer from "../components/EditAnswer";
@@ -24,6 +24,7 @@ import {
   FaReply,
   FaTrash,
 } from "react-icons/fa";
+import MarkdownRenderer from "../components/MarkdownRenderer";
 
 const ProfilePage = () => {
   const { user: authUser } = useAuth();
@@ -474,12 +475,13 @@ const ProfilePage = () => {
                             >
                               {question.title}
                             </Link>
-                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                              {question.description
-                                .replace(/<[^>]*>/g, "")
-                                .substring(0, 150)}
-                              ...
-                            </p>
+                            <div className="text-gray-600 text-sm mb-3 line-clamp-2">
+                              <MarkdownRenderer
+                                content={
+                                  question.description.substring(0, 150) + "..."
+                                }
+                              />
+                            </div>
 
                             {/* Tags */}
                             {question.tags && question.tags.length > 0 && (
@@ -626,12 +628,13 @@ const ProfilePage = () => {
                             >
                               {answer.question.title}
                             </Link>
-                            <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                              {answer.content
-                                .replace(/<[^>]*>/g, "")
-                                .substring(0, 150)}
-                              ...
-                            </p>
+                            <div className="text-gray-600 text-sm mb-3 line-clamp-2">
+                              <MarkdownRenderer
+                                content={
+                                  answer.content.substring(0, 150) + "..."
+                                }
+                              />
+                            </div>
 
                             {/* Stats */}
                             <div className="flex items-center space-x-6 text-sm text-gray-500">

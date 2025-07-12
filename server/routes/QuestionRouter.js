@@ -12,6 +12,7 @@ const {
   deleteQuestion,
   editAnswer,
   deleteAnswer,
+  getUsersForMentions,
 } = require("../controllers/QuestionController");
 
 const ensureAuthenticated = require("../middlewares/Auth");
@@ -21,6 +22,7 @@ const router = require("express").Router();
 
 // Public routes - specific routes first
 router.get("/tags", getPopularTags);
+router.get("/users", getUsersForMentions);
 router.get("/user/:userId", getUserQuestions);
 router.get("/answers/user/:userId", getUserAnswers);
 router.get("/", getQuestions);
