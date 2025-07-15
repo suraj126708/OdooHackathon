@@ -48,8 +48,11 @@ const Navbar = () => {
               >
                 <img
                   src={
-                    user?.profilePicture ||
-                    "https://flowbite.com/docs/images/people/profile-picture-3.jpg"
+                    user?.profilePicture
+                      ? user.profilePicture.startsWith("/uploads")
+                        ? `https://odoohackathon-h2x5.onrender.com${user.profilePicture}`
+                        : user.profilePicture
+                      : "https://flowbite.com/docs/images/people/profile-picture-3.jpg"
                   }
                   alt="profile"
                   className="w-8 h-8 rounded-full object-cover border-2 border-white"
@@ -135,8 +138,11 @@ const Navbar = () => {
                 >
                   <img
                     src={
-                      user?.profilePicture ||
-                      "https://flowbite.com/docs/images/people/profile-picture-3.jpg"
+                      user?.profilePicture
+                        ? user.profilePicture.startsWith("/uploads")
+                          ? `https://odoohackathon-h2x5.onrender.com${user.profilePicture}`
+                          : user.profilePicture
+                        : "https://flowbite.com/docs/images/people/profile-picture-3.jpg"
                     }
                     alt="profile"
                     className="w-10 h-10 rounded-full object-cover border-2 border-white"

@@ -99,8 +99,13 @@ const AdminUserManagement = () => {
               <div className="flex items-center space-x-3">
                 <img
                   src={
-                    user.profilePicture ||
-                    "https://flowbite.com/docs/images/people/profile-picture-3.jpg"
+                    user?.profilePicture
+                      ? user.profilePicture.startsWith("/uploads")
+                        ? `${import.meta.env.VITE_BACKEND_URL}${
+                            user.profilePicture
+                          }`
+                        : user.profilePicture
+                      : "https://flowbite.com/docs/images/people/profile-picture-3.jpg"
                   }
                   alt={user.name}
                   className="w-10 h-10 rounded-full"
